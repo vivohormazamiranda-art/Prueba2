@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { 
   LogOut, User, Search, Eye, MessageSquare, CheckCircle, XCircle,
   GraduationCap, Users, BarChart3, TrendingUp, Send, X, Clock,
-  Award, ChevronDown, Filter
+  Award, ChevronDown, Filter, RefreshCw
 } from "lucide-react";
 import { mockTestResults, TestResult, mockUsers } from "../data/users";
+import * as api from "../services/api";
 
 export function TeacherDashboard() {
   const navigate = useNavigate();
@@ -15,9 +16,63 @@ export function TeacherDashboard() {
   const [feedback, setFeedback] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [students, setStudents] = useState(mockUsers.filter(u => u.role === 'student'));
 
   const teacherName = localStorage.getItem("userName") || "Docente";
-  const students = mockUsers.filter(u => u.role === 'student');
+
+  // Cargar datos desde API
+  const loadDataFromApi = async () => {
+    setIsLoading(true);
+    try {
+      const [apiResults, apiUsers] = await Promise.all([
+        api.getTestResults(),
+        api.getUsers('student'),
+      ]);
+      
+      // Convertir resultados de API
+      const convertedResults: TestResult[] = apiResults.map((r) => ({
+        id: r.id,
+        userId: r.userId,
+        userName: r.userName,
+        score: r.score,
+        level: r.level,
+        correctAnswers: r.correctAnswers,
+        totalQuestions: r.totalQuestions,
+        feedback: r.feedback,
+        completedAt: r.completedAt,
+        duration: r.duration,
+        answers: r.answers || [],
+      }));
+      
+      // Convertir estudiantes de API
+      const convertedStudents = apiUsers.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        password: '',
+        role: u.role as 'student',
+        permissions: u.permissions,
+        status: u.status,
+        createdAt: new Date().toISOString().split('T')[0],
+        program: '',
+      }));
+      
+      if (convertedResults.length > 0) {
+        setResults(convertedResults);
+      }
+      if (convertedStudents.length > 0) {
+        setStudents(convertedStudents);
+      }
+    } catch (error) {
+      console.log("[v0] Failed to load from API, using mock data", error);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadDataFromApi();
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -29,8 +84,16 @@ export function TeacherDashboard() {
     setFeedback(result.feedback || "");
   };
 
-  const handleSaveFeedback = () => {
+  const handleSaveFeedback = async () => {
     if (selectedResult) {
+      try {
+        // Intentar guardar en API
+        await api.addFeedback(selectedResult.id, feedback);
+      } catch (error) {
+        console.log("[v0] Failed to save feedback to API", error);
+      }
+      
+      // Actualizar estado local
       const updatedResults = results.map(r => 
         r.id === selectedResult.id ? { ...r, feedback } : r
       );

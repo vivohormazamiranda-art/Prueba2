@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import {
@@ -7,13 +7,14 @@ import {
   Check, Filter, Eye, ToggleLeft, ToggleRight,
   FolderOpen, Download, Play, Pause, Music, Video,
   Volume2, Film, TrendingUp, PieChart, Activity, Calendar,
-  Award, Target, Zap, ChevronUp, ChevronDown,
+  Award, Target, Zap, ChevronUp, ChevronDown, RefreshCw,
 } from "lucide-react";
 import {
   mockUsers, User, UserPermissions, getDefaultPermissions,
   mockDocuments, Document, mockSubjects, Subject, senaPrograms,
   mockTestResults,
 } from "../data/users";
+import * as api from "../services/api";
 import {
   AreaChart, Area, BarChart, Bar, PieChart as RechartsPie, Pie, Cell,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -307,6 +308,8 @@ export function AdminDashboard() {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [documents, setDocuments] = useState<ExtendedDocument[]>(mockDocuments);
   const [subjects, setSubjects] = useState<Subject[]>(mockSubjects);
+  const [isLoading, setIsLoading] = useState(false);
+  const [useApiData, setUseApiData] = useState(true);
 
   // Modal states
   const [showUserModal, setShowUserModal] = useState(false);
@@ -339,6 +342,76 @@ export function AdminDashboard() {
     synonyms: "",
     level: "",
   });
+
+  // ── Cargar datos desde API ────────────────────────────────────────────────
+  const loadDataFromApi = async () => {
+    setIsLoading(true);
+    try {
+      const [apiUsers, apiSubjects, apiDocs] = await Promise.all([
+        api.getUsers(),
+        api.getSubjects(),
+        api.getDocuments(),
+      ]);
+      
+      // Convertir usuarios de API a formato local
+      const convertedUsers: User[] = apiUsers.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        password: '',
+        role: u.role,
+        permissions: u.permissions,
+        status: u.status,
+        createdAt: new Date().toISOString().split('T')[0],
+        docType: u.docType,
+        docNum: u.docNum,
+        phoneNum: u.phoneNum?.toString(),
+        firstName: u.firstName,
+        lastName: u.lastName,
+      }));
+      
+      // Convertir subjects de API a formato local
+      const convertedSubjects: Subject[] = apiSubjects.map((s) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        color: s.color,
+        createdAt: s.createdAt || new Date().toISOString().split('T')[0],
+      }));
+      
+      // Convertir documentos de API a formato local
+      const convertedDocs: ExtendedDocument[] = apiDocs.map((d) => ({
+        id: d.id,
+        name: d.name,
+        subjectId: d.subjectId,
+        subjectName: d.subjectName,
+        program: d.program,
+        uploadedAt: d.uploadedAt || new Date().toISOString().split('T')[0],
+        fileType: d.fileType,
+        size: d.size,
+        uploadedBy: d.uploadedBy,
+        definition: d.definition,
+        synonyms: d.synonyms,
+        level: undefined,
+      }));
+      
+      setUsers(convertedUsers.length > 0 ? convertedUsers : mockUsers);
+      setSubjects(convertedSubjects.length > 0 ? convertedSubjects : mockSubjects);
+      setDocuments(convertedDocs.length > 0 ? convertedDocs : mockDocuments);
+      setUseApiData(true);
+    } catch (error) {
+      console.log("[v0] Failed to load from API, using mock data", error);
+      setUsers(mockUsers);
+      setSubjects(mockSubjects);
+      setDocuments(mockDocuments);
+      setUseApiData(false);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadDataFromApi();
+  }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleLogout = () => { localStorage.clear(); navigate("/"); };

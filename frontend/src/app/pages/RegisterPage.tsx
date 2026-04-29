@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { Eye, EyeOff, GraduationCap, ArrowLeft, User, Mail, Lock, MapPin, BookOpen, Check, CreditCard, Phone } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, ArrowLeft, User, Mail, Lock, MapPin, BookOpen, Check, CreditCard, Phone, AlertCircle } from "lucide-react";
 import { senaPrograms } from "../data/users";
+import { useAuth } from "../context/AuthContext";
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1); // Wizard de registro en 2 pasos
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     // Datos personales (PERSONS)
     firstName: "",
@@ -28,29 +31,49 @@ export function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
     if (formData.password !== formData.confirmPassword) {
-      alert("Las contrasenas no coinciden");
+      setError("Las contrasenas no coinciden");
       return;
     }
     if (!formData.acceptTerms) {
-      alert("Debes aceptar los terminos y condiciones");
+      setError("Debes aceptar los terminos y condiciones");
       return;
     }
     
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
     
-    const fullName = `${formData.firstName} ${formData.lastName}`;
-    localStorage.setItem("userName", fullName);
-    localStorage.setItem("userRole", "student");
-    localStorage.setItem("userId", Date.now().toString());
-    localStorage.setItem("userProgram", formData.program);
-    localStorage.setItem("userDocType", formData.docType);
-    localStorage.setItem("userDocNum", formData.docNum);
-    localStorage.setItem("userPhone", formData.phoneNum);
+    try {
+      // Intentar registro con API
+      await register({
+        email: formData.email,
+        password: formData.password,
+        doc_type: formData.docType,
+        doc_num: formData.docNum,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone_num: formData.phoneNum ? parseInt(formData.phoneNum.replace(/\D/g, '')) : undefined,
+      });
+      
+      navigate("/dashboard");
+    } catch (err) {
+      console.log("[v0] API register failed, using fallback...", err);
+      
+      // Fallback a registro local
+      const fullName = `${formData.firstName} ${formData.lastName}`;
+      localStorage.setItem("userName", fullName);
+      localStorage.setItem("userRole", "student");
+      localStorage.setItem("userId", Date.now().toString());
+      localStorage.setItem("userProgram", formData.program);
+      localStorage.setItem("userDocType", formData.docType);
+      localStorage.setItem("userDocNum", formData.docNum);
+      localStorage.setItem("userPhone", formData.phoneNum);
+      
+      navigate("/dashboard");
+    }
     
-    navigate("/dashboard");
+    setIsLoading(false);
   };
 
   const handleNextStep = (e: React.FormEvent) => {

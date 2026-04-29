@@ -2,10 +2,12 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { Eye, EyeOff, GraduationCap, Mail, Lock, ArrowLeft, AlertCircle } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import { authenticateUser } from "../data/users";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -13,32 +15,71 @@ export function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [useApi, setUseApi] = useState(true); // Flag para usar API o mock
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const user = authenticateUser(formData.email, formData.password);
-    
-    if (user) {
-      localStorage.setItem("userName", user.name);
-      localStorage.setItem("userRole", user.role);
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("userPermissions", JSON.stringify(user.permissions));
-      
-      if (user.role === "admin") {
-        navigate("/admin");
-      } else if (user.role === "teacher") {
-        navigate("/teacher");
+    try {
+      if (useApi) {
+        // Intentar autenticacion con API
+        await login({ email: formData.email, password: formData.password });
+        
+        // Obtener rol del usuario desde localStorage (guardado por AuthContext)
+        const userRole = localStorage.getItem("userRole");
+        
+        if (userRole === "admin") {
+          navigate("/admin");
+        } else if (userRole === "teacher") {
+          navigate("/teacher");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
-        navigate("/dashboard");
+        // Fallback a mock data (para desarrollo sin backend)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const user = authenticateUser(formData.email, formData.password);
+        
+        if (user) {
+          localStorage.setItem("userName", user.name);
+          localStorage.setItem("userRole", user.role);
+          localStorage.setItem("userId", user.id);
+          localStorage.setItem("userPermissions", JSON.stringify(user.permissions));
+          
+          if (user.role === "admin") {
+            navigate("/admin");
+          } else if (user.role === "teacher") {
+            navigate("/teacher");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          setError("Credenciales incorrectas o cuenta inactiva. Por favor, verifica tus datos.");
+        }
       }
-    } else {
-      setError("Credenciales incorrectas o cuenta inactiva. Por favor, verifica tus datos.");
+    } catch (err) {
+      // Si falla la API, intentar con mock data
+      console.log("[v0] API login failed, trying mock data...", err);
+      const user = authenticateUser(formData.email, formData.password);
+      
+      if (user) {
+        localStorage.setItem("userName", user.name);
+        localStorage.setItem("userRole", user.role);
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("userPermissions", JSON.stringify(user.permissions));
+        
+        if (user.role === "admin") {
+          navigate("/admin");
+        } else if (user.role === "teacher") {
+          navigate("/teacher");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        setError(err instanceof Error ? err.message : "Credenciales incorrectas o cuenta inactiva.");
+      }
     }
     
     setIsLoading(false);
