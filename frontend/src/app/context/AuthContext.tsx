@@ -58,20 +58,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
-    const response = await apiLogin(credentials);
-    
-    // Guardar tokens
-    localStorage.setItem('accessToken', response.access);
-    localStorage.setItem('refreshToken', response.refresh);
-    
-    // Guardar datos del usuario
-    setUser(response.user);
-    
-    // Compatibilidad con el sistema existente
-    localStorage.setItem('userName', response.user.name);
-    localStorage.setItem('userRole', response.user.role);
-    localStorage.setItem('userId', response.user.id);
-    localStorage.setItem('userPermissions', JSON.stringify(response.user.permissions));
+    try {
+      const response = await apiLogin(credentials);
+      
+      // Guardar tokens
+      localStorage.setItem('accessToken', response.access);
+      localStorage.setItem('refreshToken', response.refresh);
+      
+      // Guardar datos del usuario
+      setUser(response.user);
+      
+      // Compatibilidad con el sistema existente
+      localStorage.setItem('userName', response.user.name);
+      localStorage.setItem('userRole', response.user.role);
+      localStorage.setItem('userId', response.user.id);
+      localStorage.setItem('userPermissions', JSON.stringify(response.user.permissions));
+    } catch (err) {
+      console.log("AUTH CONTEXT ERROR:", err);
+      throw err;
+    }
   };
 
   const register = async (data: RegisterData) => {

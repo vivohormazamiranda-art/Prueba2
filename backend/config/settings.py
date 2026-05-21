@@ -101,8 +101,13 @@ DATABASES = {
         'PASSWORD': 'Admin123*',
         'HOST': 'worklex_persistencia',
         'PORT': '5432',
+        'OPTIONS': {
+            'options': '-c search_path=WorkLex,public'
+        }
     }
 }
+
+
 
 
 # Password validation

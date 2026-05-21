@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from users.Models.modelsSENA import Person
+print(list(Person.objects.values('email', 'status')))
 """
 Script para poblar la base de datos con datos de prueba.
 Ejecutar desde el directorio backend:

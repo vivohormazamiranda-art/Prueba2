@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { Eye, EyeOff, GraduationCap, Mail, Lock, ArrowLeft, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { authenticateUser } from "../data/users";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -15,74 +14,31 @@ export function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
-  const [useApi, setUseApi] = useState(true); // Flag para usar API o mock
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    
+
     try {
-      if (useApi) {
-        // Intentar autenticacion con API
-        await login({ email: formData.email, password: formData.password });
-        
-        // Obtener rol del usuario desde localStorage (guardado por AuthContext)
-        const userRole = localStorage.getItem("userRole");
-        
-        if (userRole === "admin") {
-          navigate("/admin");
-        } else if (userRole === "teacher") {
-          navigate("/teacher");
-        } else {
-          navigate("/dashboard");
-        }
+      await login({ email: formData.email, password: formData.password });
+
+      const userRole = localStorage.getItem("userRole");
+
+      if (userRole === "admin") {
+        navigate("/admin");
+      } else if (userRole === "teacher") {
+        navigate("/teacher");
       } else {
-        // Fallback a mock data (para desarrollo sin backend)
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const user = authenticateUser(formData.email, formData.password);
-        
-        if (user) {
-          localStorage.setItem("userName", user.name);
-          localStorage.setItem("userRole", user.role);
-          localStorage.setItem("userId", user.id);
-          localStorage.setItem("userPermissions", JSON.stringify(user.permissions));
-          
-          if (user.role === "admin") {
-            navigate("/admin");
-          } else if (user.role === "teacher") {
-            navigate("/teacher");
-          } else {
-            navigate("/dashboard");
-          }
-        } else {
-          setError("Credenciales incorrectas o cuenta inactiva. Por favor, verifica tus datos.");
-        }
+        navigate("/dashboard");
       }
-    } catch (err) {
-      // Si falla la API, intentar con mock data
-      console.log("[v0] API login failed, trying mock data...", err);
-      const user = authenticateUser(formData.email, formData.password);
-      
-      if (user) {
-        localStorage.setItem("userName", user.name);
-        localStorage.setItem("userRole", user.role);
-        localStorage.setItem("userId", user.id);
-        localStorage.setItem("userPermissions", JSON.stringify(user.permissions));
-        
-        if (user.role === "admin") {
-          navigate("/admin");
-        } else if (user.role === "teacher") {
-          navigate("/teacher");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        setError(err instanceof Error ? err.message : "Credenciales incorrectas o cuenta inactiva.");
-      }
+    } catch (err: any) {
+      console.log("ERROR COMPLETO:", err);
+      console.log("MENSAJE:", err?.message);
+      setError(err?.message || "Credenciales incorrectas o cuenta inactiva.");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -212,39 +168,15 @@ export function LoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-8 p-5 bg-muted/50 rounded-xl border border-border">
-            <p className="font-medium text-foreground mb-3 text-sm">Credenciales de prueba:</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-3 p-2 bg-white rounded-lg">
-                <span className="w-8 h-8 bg-destructive/10 rounded-lg flex items-center justify-center text-xs">AD</span>
-                <div>
-                  <p className="text-foreground font-medium">Administrador</p>
-                  <p className="text-muted-foreground text-xs">admin@gmail.com / 123</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-2 bg-white rounded-lg">
-                <span className="w-8 h-8 bg-sena-blue/10 rounded-lg flex items-center justify-center text-xs">DO</span>
-                <div>
-                  <p className="text-foreground font-medium">Docente</p>
-                  <p className="text-muted-foreground text-xs">docente@gmail.com / 123</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-2 bg-white rounded-lg">
-                <span className="w-8 h-8 bg-sena-green/10 rounded-lg flex items-center justify-center text-xs">ES</span>
-                <div>
-                  <p className="text-foreground font-medium">Estudiante</p>
-                  <p className="text-muted-foreground text-xs">juan@gmail.com / 123</p>
-                </div>
-              </div>
-            </div>
-          </div>
+
+          
         </motion.div>
       </div>
 
       {/* Right Side - Decorative */}
       <div className="hidden lg:flex flex-1 bg-gradient-to-br from-sena-green via-sena-green-dark to-sena-blue relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIwOSAxLjc5MS00IDQtNHM0IDEuNzkxIDQgNC0xLjc5MSA0LTQgNC00LTEuNzkxLTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
-        
+
         <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -263,7 +195,6 @@ export function LoginPage() {
             </p>
           </motion.div>
 
-          {/* Floating Elements */}
           <motion.div
             className="absolute top-20 left-20 w-20 h-20 bg-white/10 rounded-2xl backdrop-blur-lg"
             animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}

@@ -123,25 +123,25 @@ function getAuthHeaders(): HeadersInit {
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
-  if (response.status === 401) {
-    // Token expirado, intentar refresh
-    const refreshed = await refreshToken();
-    if (!refreshed) {
-      // Si no se pudo refrescar, limpiar storage y redirigir
-      localStorage.clear();
-      window.location.href = '/login';
-      throw new ApiError('Session expired', 401);
-    }
-    throw new ApiError('Token refreshed, retry request', 401);
-  }
-  
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Error de conexion' }));
+    console.log("HANDLE RESPONSE ERROR:", error, "STATUS:", response.status);
+    
+    // Solo intentar refresh si hay token guardado (no en login)
+    if (response.status === 401 && localStorage.getItem('accessToken')) {
+      const refreshed = await refreshToken();
+      if (!refreshed) {
+        localStorage.clear();
+        window.location.href = '/login';
+      }
+    }
+    
     throw new ApiError(error.error || error.detail || 'Error en la peticion', response.status);
   }
-  
+
   return response.json();
 }
+ 
 
 async function refreshToken(): Promise<boolean> {
   const refresh = localStorage.getItem('refreshToken');
