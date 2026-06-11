@@ -87,6 +87,28 @@ export interface ApiTestResult {
   feedback?: string;
   duration?: string;
   completedAt: string;
+  process?: {
+    answers?: Array<{
+      questionId: number;
+      question: string;
+      userAnswer: number;
+      correctAnswer: number;
+      isCorrect: boolean;
+      category: string;
+    }>;
+    writingAnswers?: Array<{
+      questionId: number;
+      question: string;
+      writingAnswer: string;
+      category: string;
+    }>;
+    speakingAnswers?: Array<{
+      questionId: number;
+      question: string;
+      audioUrl: string;
+      category: string;
+    }>;
+  };
   answers: Array<{
     questionId: number;
     question: string;
@@ -109,17 +131,30 @@ class ApiError extends Error {
   }
 }
 
-function getAuthHeaders(): HeadersInit {
+function getAuthHeaders(includeJsonContentType = true): HeadersInit {
   const token = localStorage.getItem('accessToken');
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
+  const headers: HeadersInit = {};
+
+  if (includeJsonContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   return headers;
+}
+
+export async function post<T = any>(path: string, body: BodyInit): Promise<T> {
+  const isFormData = body instanceof FormData;
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: getAuthHeaders(!isFormData),
+    body,
+  });
+
+  return handleResponse<T>(response);
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -328,21 +363,13 @@ export async function getTestResults(userId?: string): Promise<ApiTestResult[]> 
   return handleResponse<ApiTestResult[]>(response);
 }
 
-export async function createTestResult(resultData: Omit<ApiTestResult, 'id' | 'userName' | 'completedAt'>): Promise<ApiTestResult> {
+export async function createTestResult(data: any): Promise<ApiTestResult> {
   const response = await fetch(`${API_BASE}/results/`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({
-      user: resultData.userId,
-      score: resultData.score,
-      level: resultData.level,
-      correct_answers: resultData.correctAnswers,
-      total_questions: resultData.totalQuestions,
-      feedback: resultData.feedback,
-      duration: resultData.duration,
-    }),
+    body: JSON.stringify(data),
   });
-  
+
   return handleResponse<ApiTestResult>(response);
 }
 
@@ -377,6 +404,7 @@ export const api = {
   getTestResults,
   createTestResult,
   addFeedback,
+  post,
 };
 
 export default api;

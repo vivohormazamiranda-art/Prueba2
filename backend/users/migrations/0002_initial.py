@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
             ],
             options={
-                'db_table': '"worklex"."persons"',
+                
             },
         ),
         migrations.CreateModel(
@@ -38,9 +38,7 @@ class Migration(migrations.Migration):
                 ('subject_id', models.CharField(max_length=50, primary_key=True, serialize=False)),
                 ('description', models.CharField(max_length=255)),
             ],
-            options={
-                'db_table': '"worklex"."subjects"',
-            },
+            
         ),
         migrations.CreateModel(
             name='RoleAccess',
@@ -50,10 +48,7 @@ class Migration(migrations.Migration):
                 ('link_id', models.CharField(max_length=50)),
                 ('status', models.CharField(max_length=50)),
             ],
-            options={
-                'db_table': '"worklex"."roles_access"',
-                'unique_together': {('role_id', 'link_id')},
-            },
+            
         ),
         migrations.CreateModel(
             name='User',
@@ -65,9 +60,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.person')),
             ],
-            options={
-                'db_table': '"worklex"."users"',
-            },
+            
         ),
         migrations.CreateModel(
             name='TestResult',
@@ -82,10 +75,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='test_results', to='users.user')),
             ],
-            options={
-                'db_table': '"worklex"."testresults"',
-                'ordering': ['-created_at'],
-            },
+            
         ),
         migrations.CreateModel(
             name='Post',
@@ -97,9 +87,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.user')),
             ],
-            options={
-                'db_table': '"worklex"."posts"',
-            },
+           
         ),
         migrations.CreateModel(
             name='UserLog',
@@ -109,9 +97,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='users.user')),
             ],
-            options={
-                'db_table': '"worklex"."users_logs"',
-            },
+            
         ),
         migrations.CreateModel(
             name='ranking',
@@ -122,10 +108,7 @@ class Migration(migrations.Migration):
                 ('value', models.CharField(max_length=50)),
                 ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.subject')),
             ],
-            options={
-                'db_table': '"worklex"."ranking"',
-                'unique_together': {('subject', 'word_id')},
-            },
+           
         ),
         migrations.CreateModel(
             name='DigitalDictionary',
@@ -139,9 +122,7 @@ class Migration(migrations.Migration):
                 ('image', models.CharField(max_length=255)),
                 ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.subject')),
             ],
-            options={
-                'db_table': '"worklex"."digital_dictionaries"',
-                'unique_together': {('word_id', 'subject')},
-            },
+            
+            
         ),
     ]

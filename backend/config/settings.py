@@ -82,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
             ],
         },
     },
@@ -93,19 +94,21 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'SENA',
-        'USER': 'admin',
-        'PASSWORD': 'Admin123*',
-        'HOST': 'worklex_persistencia',
-        'PORT': '5432',
-        'OPTIONS': {
-            'options': '-c search_path=worklex,public'
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'worklex_persistencia'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        "OPTIONS": {
+            "options": "-c search_path=worklex"
         }
     }
-}
+    }
 
 
 

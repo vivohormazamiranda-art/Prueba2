@@ -26,8 +26,6 @@ services:
     #-------------------------------------------------------------------------
     command: >
       sh -c "
-      chmod +x /app/wait-for-db.sh &&
-      /app/wait-for-db.sh &&
       python manage.py migrate --fake-initial &&
       python manage.py runserver 0.0.0.0:8000 &&
       gunicorn config.wsgi:application --bind 0.0.0.0:8000

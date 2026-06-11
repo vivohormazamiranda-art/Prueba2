@@ -84,24 +84,35 @@ class DigitalDictionarySerializer(serializers.ModelSerializer):
 
 
 class TestResultSerializer(serializers.ModelSerializer):
-    """Serializer para el modelo TestResult"""
     user_name = serializers.SerializerMethodField()
     user_email = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = TestResult
         fields = [
-            'id', 'user', 'user_name', 'user_email', 'score', 'level',
-            'correct_answers', 'total_questions', 'feedback', 'duration', 'created_at'
+            'id',
+            'user',
+            'user_name',
+            'user_email',
+            'score',
+            'level',
+            'character',
+            'correct_answers',
+            'total_questions',
+            'feedback',
+            'duration',
+            'process',
+            'created_at'
         ]
+
         extra_kwargs = {
             'id': {'read_only': True},
             'created_at': {'read_only': True},
         }
-    
+
     def get_user_name(self, obj):
         return f"{obj.user.person.first_name} {obj.user.person.last_name}"
-    
+
     def get_user_email(self, obj):
         return obj.user.person.email
 
@@ -150,11 +161,11 @@ class RegisterSerializer(serializers.Serializer):
         
         # Crear User con rol APRENDIZ por defecto
         user = User.objects.create(
-            person=person,
-            role_id='APRENDIZ',
-            status='EN_FORMACION',
-            mfa=''
-        )
+    person=person,
+    role_id=validated_data['role_id'],
+    status='EN_FORMACION',
+    mfa=''
+)
         
         return user
 

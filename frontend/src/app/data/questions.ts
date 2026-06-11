@@ -1,15 +1,18 @@
 export type Question = {
   id: number;
+  type: 'multiple' | 'writing' | 'speaking';
   question: string;
-  options: string[];
-  correctAnswer: number;
+  prompt?: string;
+  options?: string[];
+  correctAnswer?: number;
   difficulty: 'Easy' | 'Medium' | 'Hard';
-  category: 'Grammar' | 'Vocabulary' | 'Reading' | 'Pronunciation';
+  category: string;
 };
 
 export const questions: Question[] = [
   // Easy - Vocabulario
   {
+    type: 'multiple',
     id: 1,
     question: "What is the opposite of 'hot'?",
     options: ['Warm', 'Cold', 'Sunny', 'Dry'],
@@ -18,6 +21,7 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 2,
     question: "What is the synonym of 'happy'?",
     options: ['Sad', 'Angry', 'Joyful', 'Tired'],
@@ -26,6 +30,7 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 3,
     question: "Choose the correct article: '__ apple a day keeps the doctor away'",
     options: ['A', 'An', 'The', 'No article'],
@@ -34,6 +39,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 4,
     question: "What does 'big' mean?",
     options: ['Small', 'Large', 'Fast', 'Slow'],
@@ -42,6 +48,7 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 5,
     question: "Complete: 'She ___ to school every day'",
     options: ['go', 'goes', 'going', 'gone'],
@@ -52,6 +59,7 @@ export const questions: Question[] = [
   
   // Medium - Gramática
   {
+    type: 'multiple',
     id: 6,
     question: "If I _____ known about the party, I would have gone.",
     options: ['knew', 'had known', 'have known', 'would know'],
@@ -60,6 +68,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 7,
     question: "She has been working here _____ 2015.",
     options: ['for', 'since', 'during', 'from'],
@@ -68,6 +77,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 8,
     question: "Choose the correct form: 'I wish I _____ speak Chinese'",
     options: ['can', 'could', 'will', 'would'],
@@ -76,6 +86,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 9,
     question: "What is a phrasal verb meaning 'to postpone'?",
     options: ['put off', 'put on', 'put up', 'put down'],
@@ -84,6 +95,7 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 10,
     question: "By the time you arrive, I _____ dinner.",
     options: ['finish', 'will finish', 'will have finished', 'finished'],
@@ -92,6 +104,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 11,
     question: "Choose the correct preposition: 'She is good ___ mathematics'",
     options: ['in', 'at', 'on', 'for'],
@@ -100,6 +113,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 12,
     question: "What does 'break the ice' mean?",
     options: ['To destroy something', 'To start a conversation', 'To be very cold', 'To solve a problem'],
@@ -110,6 +124,7 @@ export const questions: Question[] = [
   
   // Hard - Comprensión
   {
+    type: 'multiple',
     id: 13,
     question: "Reading: 'The invention of the steam engine revolutionized manufacturing, transforming small-scale craft production into large-scale industrial output. This shift fundamentally altered society by creating urban centers.' What was one major consequence?",
     options: ['It reduced the need for craftspeople', 'It led to the development of urban centers', 'It decreased overall wealth', 'It eliminated the need for factories'],
@@ -118,6 +133,7 @@ export const questions: Question[] = [
     category: 'Reading',
   },
   {
+    type: 'multiple',
     id: 14,
     question: "Which sentence uses subjunctive mood correctly?",
     options: ['I suggest that she comes early', 'I suggest that she come early', 'I suggest that she will come early', 'I suggest that she is coming early'],
@@ -126,6 +142,7 @@ export const questions: Question[] = [
     category: 'Grammar',
   },
   {
+    type: 'multiple',
     id: 15,
     question: "Choose the word that best completes: 'His _____ attitude made it difficult to work with him'",
     options: ['amenable', 'intractable', 'affable', 'gregarious'],
@@ -134,6 +151,7 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 16,
     question: "Reading: 'Despite the economic downturn, the company's revenue remained resilient, attributed largely to strategic diversification.' What helped the company?",
     options: ['Economic growth', 'Strategic diversification', 'Employee layoffs', 'Price increases'],
@@ -142,14 +160,15 @@ export const questions: Question[] = [
     category: 'Reading',
   },
   {
+    type: 'writing',
     id: 17,
-    question: "Which is correct? 'Neither of the solutions _____ acceptable'",
-    options: ['is', 'are', 'were', 'be'],
-    correctAnswer: 0,
+    question: "Describe your family in English.",
+    prompt: "Write a short paragraph about your family. Include who they are and what they do.",
     difficulty: 'Hard',
-    category: 'Grammar',
+    category: 'Writing',
   },
   {
+    type: 'multiple',
     id: 18,
     question: "What does 'to beat around the bush' mean?",
     options: ['To be direct', 'To avoid the main topic', 'To work hard', 'To be confused'],
@@ -158,14 +177,16 @@ export const questions: Question[] = [
     category: 'Vocabulary',
   },
   {
+    type: 'multiple',
     id: 19,
-    question: "Reading: 'Photosynthesis is the process by which plants convert light energy into chemical energy.' What do plants convert light energy into?",
-    options: ['Water', 'Oxygen', 'Chemical energy', 'Carbon dioxide'],
-    correctAnswer: 2,
+    type: 'speaking',
+    question: "Introduce yourself in English for 30 seconds.",
+    prompt: "Introduce yourself in English for 30 seconds.",
     difficulty: 'Medium',
-    category: 'Reading',
+    category: 'Speaking',
   },
   {
+    type: 'multiple',
     id: 20,
     question: "Complete: 'Scarcely _____ arrived when the meeting started'",
     options: ['I had', 'had I', 'I have', 'have I'],
