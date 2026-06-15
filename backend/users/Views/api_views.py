@@ -4,21 +4,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from ..Controllers.ControllerSENA import (
-    AuthController,
-    PersonController,
-    UserController,
-    SubjectController,
-    DictionaryController,
-    TestResultController,
+    AuthController, PersonController, UserController,
+    SubjectController, DictionaryController, TestResultController,
     _build_user_response,
 )
 from ..serializers import (
-    LoginSerializer,
-    RegisterSerializer,
-    PersonSerializer,
-    DigitalDictionarySerializer,
-    TestResultSerializer,
+    LoginSerializer, RegisterSerializer, PersonSerializer,
+    DigitalDictionarySerializer, TestResultSerializer, UserSerializer,
 )
+from ..permissions import IsSuperAdmin, IsAdminOrSuperAdmin
 
 
 class LoginAPIView(APIView):
@@ -90,7 +84,9 @@ class UserViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        return Response(UserController.list_all(role_filter=request.query_params.get('role')))
+        return Response(UserController.list_all(
+            role_filter=request.query_params.get('role')
+        ))
 
     def retrieve(self, request, pk=None):
         user, error = UserController.get_by_id(pk)
@@ -107,6 +103,12 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=['patch'])
     def change_role(self, request, pk=None):
+        user_obj = request.user
+        if not user_obj or getattr(user_obj, 'role_id', None) != 'SUPERADMIN':
+            return Response(
+                {'error': 'Solo el SuperAdmin puede cambiar roles'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         new_role = request.data.get('role')
         if not new_role:
             return Response({'error': 'Role not provided'}, status=status.HTTP_400_BAD_REQUEST)
@@ -114,6 +116,20 @@ class UserViewSet(viewsets.ViewSet):
         if error:
             return Response({'error': error}, status=status.HTTP_404_NOT_FOUND)
         return Response({'role': role})
+
+    def destroy(self, request, pk=None):
+        target_user, error = UserController.get_by_id(pk)
+        if error:
+            return Response({'error': error}, status=status.HTTP_404_NOT_FOUND)
+        if target_user.role_id == 'SUPERADMIN':
+            return Response(
+                {'error': 'No se puede eliminar al SuperAdmin'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        ok, error = UserController.delete(pk)
+        if error:
+            return Response({'error': error}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubjectViewSet(viewsets.ViewSet):
@@ -145,7 +161,9 @@ class DigitalDictionaryViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        return Response(DictionaryController.list_all(subject_id=request.query_params.get('subject')))
+        return Response(DictionaryController.list_all(
+            subject_id=request.query_params.get('subject')
+        ))
 
     def retrieve(self, request, pk=None):
         doc, error = DictionaryController.get_by_id(pk)
@@ -170,7 +188,9 @@ class TestResultViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        return Response(TestResultController.list_all(user_id=request.query_params.get('user_id')))
+        return Response(TestResultController.list_all(
+            user_id=request.query_params.get('user_id')
+        ))
 
     def create(self, request):
         result, error = TestResultController.create(request.data)
