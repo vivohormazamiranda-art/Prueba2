@@ -1,3 +1,16 @@
+export type Question = {
+  id: number;
+  type: "multiple" | "writing" | "speaking" | "listening";
+  question: string;
+  prompt?: string;
+  audio?: string;
+  options?: string[];
+  correctAnswer?: number;
+  difficulty?: number;
+  points?: number;
+  category: string;
+};
+
 export const questionsB1 = [
   {
     id: 1,
@@ -318,5 +331,70 @@ export const questionsB1 = [
     ],
     correctAnswer: 0,
     points: 5
+  },
+  {
+    id: 100,
+    level: "B1",
+    type: "writing",
+    question: "Describe your daily routine.",
+    prompt: "Write 50 words.",
+    difficulty: 3,
+    category: "Writing"
+  },
+  {
+    id: 101,
+    level: "B1",
+    type: "writing",
+    question: "Describe your daily routine.",
+    prompt: "Write 50 words.",
+    difficulty: 3,
+    category: "Writing"
   }
 ];
+
+export default questionsB1;
+
+export const getLevelFromScore = (
+  score: number
+): {
+  level: string;
+  status: string;
+  description: string;
+  message: string;
+  canAdvance: boolean;
+} => {
+  if (score >= 95)
+    return {
+      level: 'B1',
+      status: 'Mastered',
+      description: 'Excellent Performance',
+      message: 'Congratulations! B2 has been unlocked.',
+      canAdvance: true,
+    };
+
+  if (score >= 80)
+    return {
+      level: 'B1',
+      status: 'Competent',
+      description: 'Good Performance',
+      message: 'You have a solid understanding of B1.',
+      canAdvance: false,
+    };
+
+  if (score >= 50)
+    return {
+      level: 'B1',
+      status: 'Developing',
+      description: 'Basic Understanding',
+      message: 'You passed B1, but more practice is recommended.',
+      canAdvance: false,
+    };
+
+  return {
+    level: 'B1',
+    status: 'Failed',
+    description: 'Not Passed',
+    message: 'You need more practice with B1.',
+    canAdvance: false,
+  };
+};

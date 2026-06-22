@@ -1,3 +1,16 @@
+export type Question = {
+  id: number;
+  type: "multiple" | "writing" | "speaking" | "listening";
+  question: string;
+  prompt?: string;
+  audio?: string;
+  options?: string[];
+  correctAnswer?: number;
+  difficulty?: number;
+  points?: number;
+  category: string;
+};
+
 export const questionsB2 = [
 
 {
@@ -341,3 +354,51 @@ export const questionsB2 = [
 }
 
 ];
+
+export default questionsB2;
+
+export const getLevelFromScore = (
+  score: number
+): {
+  level: string;
+  status: string;
+  description: string;
+  message: string;
+  canAdvance: boolean;
+} => {
+  if (score >= 95)
+    return {
+      level: 'B2',
+      status: 'Mastered',
+      description: 'Excellent Performance',
+      message: 'Congratulations! You have completed all available levels.',
+      canAdvance: false,
+    };
+
+  if (score >= 80)
+    return {
+      level: 'B2',
+      status: 'Competent',
+      description: 'Good Performance',
+      message: 'You have a solid understanding of B2.',
+      canAdvance: false,
+    };
+
+  if (score >= 50)
+    return {
+      level: 'B2',
+      status: 'Developing',
+      description: 'Basic Understanding',
+      message: 'You passed B2, but more practice is recommended.',
+      canAdvance: false,
+    };
+
+  return {
+    level: 'B2',
+    status: 'Failed',
+    description: 'Not Passed',
+    message: 'You need more practice with B2.',
+    canAdvance: false,
+  };
+};
+
