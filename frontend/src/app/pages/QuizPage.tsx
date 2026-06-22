@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { Star, Clock, Trophy, Zap, X, GraduationCap } from "lucide-react";
-import { questions } from "../data/questions";
 import * as api from "../services/api";
 
 type AnswerState = "idle" | "correct" | "incorrect" | "submitted";
@@ -39,11 +38,6 @@ export function QuizPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const question = questions[currentQuestion];
-  const isSpeakingQuestion = question.type === "speaking";
-  const isWritingQuestion = question.type === "writing";
-  const isMultipleQuestion = question.type === "multiple";
 
   const cleanupRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
